@@ -1,10 +1,10 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 
-from animals.request import delete_animal, get_all_animals, get_single_animal, create_animal
-from employees.request import get_all_employees, get_single_employee, create_employee
-from customers.request import get_single_customer, get_all_customers, create_customer
-from locations.request import get_single_location, get_all_locations, create_location
+from animals.request import delete_animal, get_all_animals, get_single_animal, create_animal, update_animal
+from employees.request import delete_employee, get_all_employees, get_single_employee, create_employee, update_employee
+from customers.request import delete_customer, get_single_customer, get_all_customers, create_customer, update_customer
+from locations.request import delete_location, get_single_location, get_all_locations, create_location, update_location
 
 # Here's a class. It inherits from another class.
 # For now, think of a class as a container for functions that
@@ -92,38 +92,30 @@ class HandleRequests(BaseHTTPRequestHandler):
     def do_POST(self):
 
         self._set_headers(201)
+
         content_len = int(self.headers.get('content-length', 0))
         post_body = self.rfile.read(content_len)
-
-        # Convert JSON string to a Python dictionary
         post_body = json.loads(post_body)
 
-        # Parse the URL
         (resource, id) = self.parse_url(self.path)
 
-        # Initialize new animal
-        new_animal = None
-        new_employees = None
-        new_locations = None
-        new_customers = None
+        new_obj = None
 
         if resource == "animals":
-            new_animal = create_animal(post_body)
-            self.wfile.write(f"{new_animal}".encode())
+            new_obj = create_animal(post_body)
 
         if resource == "employees":
-            new_employees = create_employee(post_body)
-            self.wfile.write(f"{new_employees}".encode())
+            new_obj = create_employee(post_body)
 
         if resource == "locations":
-            new_locations = create_location(post_body)
-            self.wfile.write(f"{new_locations}".encode())
+            new_obj = create_location(post_body)
 
         if resource == "customers":
-            new_customers = create_customer(post_body)
-            self.wfile.write(f"{new_customers}".encode())
+            new_obj = create_customer(post_body)
 
         # Encode the new animal and send in response
+        self.wfile.write(f"{new_obj}".encode())
+
 
     def do_DELETE(self):
         # Set a 204 response code
@@ -136,14 +128,44 @@ class HandleRequests(BaseHTTPRequestHandler):
         if resource == "animals":
             delete_animal(id)
 
+        # Delete a single employee from the list
+        if resource == "employees":
+            delete_employee(id)
+
+        # Delete a single customer from the list
+        if resource == "customers":
+            delete_customer(id)
+
+        # Delete a single location from the list
+        if resource == "locations":
+            delete_location(id)
+
         # Encode the new animal and send in response
         self.wfile.write("".encode())
         # Here's a method on the class that overrides the parent's method.
         # It handles any PUT request.
 
     def do_PUT(self):
-        self.do_POST()
+        self._set_headers(204)
+        content_len = int(self.headers.get('content-length', 0))
+        post_body = self.rfile.read(content_len)
+        post_body = json.loads(post_body)
 
+        # Parse the URL
+        (resource, id) = self.parse_url(self.path)
+
+        # Delete a single animal from the list
+        if resource == "animals":
+            update_animal(id, post_body)
+        if resource == "customers":
+            update_customer(id, post_body)
+        if resource == "locations":
+            update_location(id, post_body)
+        if resource == "employees":
+            update_employee(id, post_body)
+
+        # Encode the new animal and send in response
+        self.wfile.write("".encode())
 
 # This function is not inside the class. It is the starting
 # point of this application.

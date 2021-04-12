@@ -1,3 +1,12 @@
 {
-    "python.pythonPath": "/Users/blufordsanders/.local/share/virtualenvs/python-server-nzrA-WEL/bin/python"
+    "python.pythonPath": "/Users/blufordsanders/.local/share/virtualenvs/python-server-nzrA-WEL/bin/python",
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "Python Kennels",
+            "database": "kennel.db"
+        }
+    ],
+    "sqltools.useNodeRuntime": true
 }
