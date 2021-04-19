@@ -1,6 +1,7 @@
 import sqlite3
 import json
 from models import Employee
+from models import Location
 
 EMPLOYEES = [
     {
@@ -39,8 +40,11 @@ def get_all_employees():
             e.id,
             e.name,
             e.address,
-            e.location_id
+            e.location_id,
+            l.name location_name,
+            l.address location_address
         FROM employee e
+        JOIN location l on l.id = e.location_id
         """)
 
         # Initialize an empty list to hold all employee representations
@@ -60,6 +64,12 @@ def get_all_employees():
 
             employees.append(employee.__dict__)
 
+            # Create a Location instance from the current row
+            location = Location(row['id'], row['location_name'], row['location_address'])
+
+            # Add the dictionary representation of the location to the animal
+            employee.location = location.__dict__
+
     # Use `json` package to properly serialize list as JSON
     return json.dumps(employees)
 
@@ -76,8 +86,11 @@ def get_single_employee(id):
             e.id,
             e.name,
             e.address,
-            e.location_id
+            e.location_id.
+            l.name location_name,
+            l.address location_address
         FROM employee e
+        JOIN location l on l.id = e.location_id
         WHERE e.id = ?
         """, ( id, ))
 
@@ -130,3 +143,29 @@ def update_employee(id, new_employee):
             # Found the employee. Update the value.
             EMPLOYEES[index] = new_employee
             break
+
+def get_employees_by_location(locationId):
+
+    with sqlite3.connect("./kennel.db") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+
+        # Write the SQL query to get the information you want
+        db_cursor.execute("""
+        select
+            c.id,
+            c.name,
+            c.address,
+            c.location_id
+        from Employee c
+        WHERE c.location_id = ?
+        """, ( locationId, ))
+
+        employees = []
+        dataset = db_cursor.fetchall()
+
+        for row in dataset:
+            employee = Employee(row['id'], row['name'], row['address'], row['location_id'])
+            employees.append(employee.__dict__)
+
+    return json.dumps(employees)
